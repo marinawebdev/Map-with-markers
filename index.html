@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Map</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	<link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+	<style>
+		
+		.stores {
+			background: transparent;
+		}
+
+		.stores>div {
+			padding-left: 0;
+			padding-right: 0;
+		}
+
+	      #map {
+	        height: 500px;
+	        margin-right: 15px;
+	        width: 63.666667%;
+	      }
+
+	      #floating-pannel {
+	      	overflow: hidden;
+	      	height: 500px;
+	      	background: #fff;
+		    margin-left: 15px;
+		    text-align: left;
+	      }
+
+	      #floating-pannel>ul {
+	      	padding: 10px;
+	      	list-style: none;
+	      }
+
+	      #floating-pannel>ul>li {
+	      	padding-bottom: 10px;
+	      }
+
+	      #floating-pannel>ul>li>a {
+	      	text-decoration: none;
+	      	color: #000;
+	      }
+
+	      .dropdown {
+	      	outline: none;
+	      }
+
+	      .dropdown>button.btn {
+	      	background: none;
+	      	padding: 20px 40px;
+	      	font-size: 22px;
+	      	color: #444444;
+			font-family: 'Ubuntu', sans-serif;
+			font-weight: 300;
+			border: none;
+			box-shadow: none;
+			border-radius: 0;
+			width: 100%;
+	    	text-align: left;
+	    	position: relative;
+	    	border-bottom: 4px solid #efefef;
+	      }
+
+	      .dropdown>.dropdown-toggle.btn-default:focus, .dropdown>.dropdown-toggle.btn-default:hover {
+	      	background-color: transparent;
+			border: none;
+			box-shadow: none;
+			border-bottom: 4px solid #efefef;
+	      }
+
+	      .dropdown.open>button.btn:focus>.caret {
+	      	transform: rotate(225deg);
+	      	top: 35px;
+	      }
+
+	      .dropdown>button>.caret {
+	      	border-bottom: 1px solid #e50400;
+			border-right: 1px solid #e50400;
+			border-top: transparent;
+			border-left: transparent;
+			width: 13px;
+			height: 13px;
+			transform: rotate(45deg);
+			position: absolute;
+			right: 35px;
+			top: 25px;
+	      }
+
+	      .dropdown-menu {
+	      	width: 100%;
+	      	border: none;
+	      	padding: 25px 0;
+	      	border-radius: 0;
+	      	outline: none;
+	      }
+
+	      .dropdown-menu>li>a {
+	      	padding: 10px 40px;
+			font-family: 'Ubuntu', sans-serif;
+			font-weight: 300;
+			font-size: 22px;
+	      }
+
+	      .dropdown-menu>li>a:hover {
+			background: transparent;
+			color: #e50400;
+	      }
+
+	      #adress {
+	      	overflow: scroll;
+	      	height: 446px;
+	      }
+
+		#adress::-webkit-scrollbar { width: 0; }
+
+		#adress { -ms-overflow-style: none; }
+
+		#adress { overflow: -moz-scrollbars-none; }
+
+	      #adress ul>li>a {
+	      	font-family: 'Ubuntu', sans-serif;
+			font-weight: 300;
+			font-size: 18px;
+			color: #444444;
+			padding-left: 95px;
+			display: block;
+			position: relative;
+			text-align: left;
+	      }
+
+	      #adress ul>li>a:before {
+	      	content: "";
+	      	position: absolute;
+	      	top: 5px;
+	      	left: 40px;
+	      	background-image: url(img/placeholder_grey.svg);
+	      	width: 30px;
+	      	height: 30px;
+	      }
+
+	      #adress ul>li.active>a:before {
+	      	background-image: url(img/placeholder_active.svg);
+	      }
+
+	      #adress ul>li>a {
+	      	text-decoration: none;
+	      }
+
+	      #adress ul {
+	      	list-style: none;
+	      	padding: 0;
+	      }
+
+	      #adress ul>li {
+	      	padding: 30px 0;
+	      	border-bottom: 2px solid #efefef;
+	      }
+
+	      #adress ul>li:last-child {
+	      	padding: 30px 0;
+	      	border-bottom: none;
+	      }
+
+	      .dropdown>button:nth-child(2), .sum {
+	      	display: none;
+	      }
+
+    </style>
+  </head>
+ 
+  <body>
+  	<div class="container stores">
+  			<div id="map" class="col-xs-8"></div>
+	  		<div id="floating-pannel" class="col-xs-4">
+		  		<div class="dropdown">
+				  	<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				    	Харьков
+				    <span class="caret"></span>
+				  	</button>
+				  	<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+				    	Сумы
+				    <span class="caret"></span>
+				  	</button>
+				  	<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+					    <li id="first_town"><a href="#">Харьков</a></li>
+					    <li id="second_town"><a href="#">Сумы</a></li>
+				  	</ul>
+				</div>
+				<ul id="adress">
+					<li>
+						<ul class="kh">
+							<li><a href="#" onclick="displayMarkers(1);">м. Спортивная, ул Плехановская, 73-М, выход метро стадион Металлист</a></li>
+							<li><a href="#" onclick="displayMarkers(2);">м. Пролетарская (Индустриальная), пр.Московский, 293-М, выход метро торговая площадка «Лосево»</a></li>
+							<li><a href="#" onclick="displayMarkers(3);">м. Университет, ул. Сумская, 39-М, выход метро к дворцу детского и юношеского творчества</a></li>
+							<li><a href="#" onclick="displayMarkers(4);">м. ЮЖД, пл. Привокзальная, 2-М, выход метро к платформам отправления поздов</a></li>
+							<li><a href="#" onclick="displayMarkers(5);">м. Тракторный завод, пр. Орджоникидзе (пр. Архитектора Алёшина), 2-М, выход метро к административному корпусу завода ХТЗ</a></li>
+							<li><a href="#" onclick="displayMarkers(6);">м. Исторический музей, пл. Конституции, 17-М, выход метро к историческому музею</a></li>
+							<li><a href="#" onclick="displayMarkers(7);">м. Маршала Жукова (Дворец Спорта), пр. Московский, 190/1-М, выход метро к дому мебели</a></li>
+							<li><a href="#" onclick="displayMarkers(8);">м. Холодная гора, ул. Полтавский шлях, 146-М, выход метро к терминалу автобусов</a></li>
+							<li><a href="#" onclick="displayMarkers(9);">м. Площадь Восстания (Защитников Украины), пр. Московский, 94-М, выход метро к ДК ХЭМЗ</a></li>
+							<li><a href="#" onclick="displayMarkers(10);">м. Центральный рынок, пр. Машиностроителей, 4-М</a></li>
+							<li><a href="#" onclick="displayMarkers(11);">ул. Салтовское шоссе, 147</a></li>
+							<li><a href="#" onclick="displayMarkers(12);">пр. 50-лет ВЛКСМ (проспект Юбилейный), 64</a></li>
+							<li><a href="#" onclick="displayMarkers(13);">ул. Богомольца, 1</a></li>
+							<li><a href="#" onclick="displayMarkers(14);">пер. Донецкий, 18</a></li>
+							<li><a href="#" onclick="displayMarkers(15);">ул. Героев Труда, 13 рынок Европа</a></li>
+							<li><a href="#" onclick="displayMarkers(16);">ул. Василия Мельника 4/1 Новые дома</a></li>
+							<li><a href="#" onclick="displayMarkers(17);">ул. Ильинская, 67</a></li>
+							<li><a href="#" onclick="displayMarkers(18);">ул. Саперная, 34</a></li>
+							<li><a href="#" onclick="displayMarkers(19);">ул. Старошишковская, 7</a></li>
+							<li><a href="#" onclick="displayMarkers(20);">б-р. Грицевца, 6</a></li>
+							<li><a href="#" onclick="displayMarkers(21);">ул. Грицевца, 48-50</a></li>
+							<li><a href="#" onclick="displayMarkers(22);">ул. Зубарева, 35А</a></li>
+							<li><a href="#" onclick="displayMarkers(23);">ул. Роганская, 132</a></li>
+							<li><a href="#" onclick="displayMarkers(24);">пр. Московский, 218</a></li>
+							<li><a href="#" onclick="displayMarkers(25);">пр. Московский, 318</a></li>
+							<li><a href="#" onclick="displayMarkers(26);">ул. Тарасовская, 10</a></li>
+							<li><a href="#" onclick="displayMarkers(27);">ул. Шариковая, 36</a></li>
+							<li><a href="#" onclick="displayMarkers(28);">пр. Победы, 54</a></li>
+							<li><a href="#" onclick="displayMarkers(29);">ул. Командарма Корка (Леся Сердюка), 36</a></li>
+							<li><a href="#" onclick="displayMarkers(30);">ул. 23 Августа, 30</a></li>
+							<li><a href="#" onclick="displayMarkers(31);">ул. Золочевская, 12а</a></li>
+							<li><a href="#" onclick="displayMarkers(32);">пр. Московский, 274</a></li>
+							<li><a href="#" onclick="displayMarkers(33);">ул. Бекетова, 22</a></li>
+							<li><a href="#" onclick="displayMarkers(34);">ул. Академика Павлова, 323-А</a></li>
+							<li><a href="#" onclick="displayMarkers(35);">ул. Китаенко, 8</a></li>
+							<li><a href="#" onclick="displayMarkers(36);">ул. Блюхера (Валентиновская), 21</a></li>
+							<li><a href="#" onclick="displayMarkers(37);">пр. Тракторостроителей, 105</a></li>
+							<li><a href="#" onclick="displayMarkers(38);">рынок «Алексеевская ярмарка», перекресток пр. Победы и пр. Людвига Свободы</a></li>
+						</ul>
+					</li>
+					<li>
+						<ul class="sum">
+							
+						</ul>
+					</li>
+					
+				</ul>
+  			</div>
+  		
+	</div>
+    <script>
+
+	$('#adress ul>li').click(function() {
+		$('li.active').removeClass('active');
+		$(this).addClass('active');
+	});
+
+	$('.dropdown-menu>#first_town').click(function() {
+		$('.dropdown>button:first-child').css('display', 'block');
+		$('.dropdown>button:nth-child(2)').css('display', 'none');
+		$('.kh').css('display', 'block');
+	});
+
+	$('.dropdown-menu>#second_town').click(function() {
+		$('.dropdown>button:first-child').css('display', 'none');
+		$('.kh').css('display', 'none');
+		$('.dropdown>button:nth-child(2)').css('display', 'block');
+		$('.sum').css('display', 'block');
+	});
+
+    var map;
+    var centerKh = {lat: 49.987530, lng: 36.256048};
+    var centerSum = {lat: 50.907344, lng: 34.799115};
+    var locations = [
+      	[49.978888, 36.264974, 1],
+      	[49.948008, 36.405107, 2],
+      	[50.005539, 36.235503, 3],
+      	[49.990313, 36.205959, 4],
+    	[49.951391, 36.376214, 5],
+    	[49.990531, 36.232801, 6],
+    	[49.965357, 36.322289, 7],
+    	[49.983240, 36.183661, 8],
+    	[49.987689, 36.267291, 9],
+    	[49.939650, 36.276182, 10],
+    	[49.991019, 36.357189, 11],
+    	[49.996566, 36.341092, 12],
+    	[49.966177, 36.218106, 13],
+    	[49.981888, 36.242941, 14],
+    	[50.024502, 36.337668, 15],
+    	[49.963384, 36.324454, 16],
+    	[49.984725, 36.181223, 17],
+    	[50.028648, 36.299203, 18],
+    	[50.038194, 36.287294, 19],
+    	[49.929030, 36.436062, 20],
+    	[49.914916, 36.405132, 21],
+    	[49.912532, 36.409787, 22],
+    	[49.918862, 36.416131, 23],
+    	[49.960281, 36.343949, 24],
+    	[49.932259, 36.427319, 25],
+    	[49.983207, 36.275085, 26],
+    	[49.933028, 36.413138, 27],
+    	[50.055060, 36.198130, 28],
+    	[50.037718, 36.348283, 29],
+    	[50.034535, 36.222761, 30],
+    	[49.983108, 36.155071, 31],
+    	[49.944763, 36.399835, 32],
+    	[49.942877, 36.373971, 33],
+    	[50.024909, 36.335250, 34],
+    	[49.950272, 36.164089, 35],
+    	[50.016349, 36.332730, 36],
+    	[50.010524, 36.350020, 37],
+    	[50.059051, 36.201655, 38]
+    ];
+
+    var markers = [];
+
+    var i, newMarker;
+    var image = 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          	center: centerKh,
+          	zoom: 11.35,
+          	zoomControl: true,
+          	fullscreenControl: false,
+		    zoomControlOptions: {
+		        position: google.maps.ControlPosition.LEFT_BOTTOM
+		    },
+          	styles: [
+			    {
+			        "featureType": "water",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#e9e9e9"
+			            },
+			            {
+			                "lightness": 17
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "landscape",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#f5f5f5"
+			            },
+			            {
+			                "lightness": 20
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "road.highway",
+			        "elementType": "geometry.fill",
+			        "stylers": [
+			            {
+			                "color": "#ffffff"
+			            },
+			            {
+			                "lightness": 17
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "road.highway",
+			        "elementType": "geometry.stroke",
+			        "stylers": [
+			            {
+			                "color": "#ffffff"
+			            },
+			            {
+			                "lightness": 29
+			            },
+			            {
+			                "weight": 0.2
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "road.arterial",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#ffffff"
+			            },
+			            {
+			                "lightness": 18
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "road.local",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#ffffff"
+			            },
+			            {
+			                "lightness": 16
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "poi",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#f5f5f5"
+			            },
+			            {
+			                "lightness": 21
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "poi.park",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#dedede"
+			            },
+			            {
+			                "lightness": 21
+			            }
+			        ]
+			    },
+			    {
+			        "elementType": "labels.text.stroke",
+			        "stylers": [
+			            {
+			                "visibility": "on"
+			            },
+			            {
+			                "color": "#ffffff"
+			            },
+			            {
+			                "lightness": 16
+			            }
+			        ]
+			    },
+			    {
+			        "elementType": "labels.text.fill",
+			        "stylers": [
+			            {
+			                "saturation": 36
+			            },
+			            {
+			                "color": "#333333"
+			            },
+			            {
+			                "lightness": 40
+			            }
+			        ]
+			    },
+			    {
+			        "elementType": "labels.icon",
+			        "stylers": [
+			            {
+			                "visibility": "off"
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "transit",
+			        "elementType": "geometry",
+			        "stylers": [
+			            {
+			                "color": "#f2f2f2"
+			            },
+			            {
+			                "lightness": 19
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "administrative",
+			        "elementType": "geometry.fill",
+			        "stylers": [
+			            {
+			                "color": "#fefefe"
+			            },
+			            {
+			                "lightness": 20
+			            }
+			        ]
+			    },
+			    {
+			        "featureType": "administrative",
+			        "elementType": "geometry.stroke",
+			        "stylers": [
+			            {
+			                "color": "#fefefe"
+			            },
+			            {
+			                "lightness": 17
+			            },
+			            {
+			                "weight": 1.2
+			            }
+			        ]
+			    }
+			]
+        });
+
+        for (i = 0; i < locations.length; i++) {
+	      	newMarker = new google.maps.Marker({
+	       		position: new google.maps.LatLng(locations[i][0], locations[i][1]),
+	        	map: map,
+	        	number: locations[i][2],
+	        	icon: {
+					url: "img/pin.svg",
+					scaledSize: new google.maps.Size(40, 20)
+				}
+	       	});
+
+	       	newMarker.number = locations[i][2];
+	       	newMarker.setVisible(true);
+
+	       	markers.push(newMarker);
+	    };
+
+	    map.addListener('click', function() {
+			map.setZoom(11.35);
+			map.panTo(centerKh);
+			for (i = 0; i < markers.length; i++) {
+				markers[i].setVisible(true);
+			};
+		});
+      };
+
+
+    function displayMarkers(number) {
+	    var i;
+
+	    for (i = 0; i < markers.length; i++) {
+	    	if (markers[i].number === number) {
+		        markers[i].setVisible(true);
+		        map.setZoom(14.25);
+		        map.panTo(markers[i].position);
+	       	}
+	       	else {
+	        	markers[i].setVisible(false);
+	       	}
+	    }
+	};
+
+	$('#first_town, .dropdown>button:first-child, .active').click(function() {
+		map.setZoom(11.35);
+		map.panTo(centerKh);
+		for (i = 0; i < markers.length; i++) {
+			markers[i].setVisible(true);
+		}
+	});
+
+	$('#second_town').click(function() {
+		map.setZoom(13);
+		map.panTo(centerSum);
+	});	
+	
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHDqM-pVUPCwWqLNVfVU31SqiCnqMljxw&callback=initMap"
+    async defer></script>
+  </body>
+</html>
